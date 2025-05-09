@@ -9,11 +9,12 @@ import path from "path";
 import cookieParser from "cookie-parser";
 import { fileURLToPath } from "url";
 import connectDB from "./Config/connectionDB.js";
+import { register } from "./Controllers/auth.controller.js";
 const app = express();
 env.config();
 
 // Environment variable
-const port = process.env.PORT;
+const port = process.env.PORT || 6001;
 const database = process.env.DB_URL;
 
 const __filename = fileURLToPath(import.meta.url);
@@ -39,9 +40,15 @@ const storage = multer.diskStorage({
 });
 const upload = multer({ storage });
 
+//custom routes with file 
+app.use("/api/auth/register", upload.single("picture"), register)
+
 // custom routes
 import authRoute from "./Routes/auth.route.js";
+import userRoute from "./Routes/users.route.js";
+
 app.use("/api/auth", authRoute);
+app.use("/api/users", userRoute);
 
 // Server & DB setup
 const start = async () => {
