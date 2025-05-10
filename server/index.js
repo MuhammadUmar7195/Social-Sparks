@@ -1,5 +1,4 @@
 import express from "express";
-import bodyParser from "body-parser";
 import cors from "cors";
 import multer from "multer";
 import helmet from "helmet";
@@ -10,6 +9,10 @@ import cookieParser from "cookie-parser";
 import { fileURLToPath } from "url";
 import connectDB from "./Config/connectionDB.js";
 import { register } from "./Controllers/auth.controller.js";
+import { createPost } from "./Controllers/posts.controller.js";
+import Post from "./Models/Post.js";
+import User from "./Models/User.js";
+import { posts, users } from "./Data/index.js";
 const app = express();
 env.config();
 
@@ -41,14 +44,17 @@ const storage = multer.diskStorage({
 const upload = multer({ storage });
 
 //custom routes with file 
-app.use("/api/auth/register", upload.single("picture"), register)
+app.use("/api/auth/register", upload.single("picture"), register);
+app.use("/api/auth/posts", upload.single("picture"), createPost);
 
 // custom routes
 import authRoute from "./Routes/auth.route.js";
 import userRoute from "./Routes/users.route.js";
+import postRoute from "./Routes/posts.route.js";
 
 app.use("/api/auth", authRoute);
 app.use("/api/users", userRoute);
+app.use("/api/posts", postRoute);
 
 // Server & DB setup
 const start = async () => {
@@ -57,6 +63,9 @@ const start = async () => {
       console.log(`Server is running on port ${port}`);
     });
     await connectDB(database);
+    /*One time data insertion in database*/
+    // User.insertMany(users);
+    // Post.insertMany(posts);
   } catch (error) {
     console.log("The DB & server error : ", error.message);
   }
